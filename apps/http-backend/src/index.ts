@@ -1,10 +1,16 @@
 import express from "express"
-import { prisma } from "@repo/db";
+import dotenv from "dotenv";
+dotenv.config();
+
+import { prisma } from "@repo/db/client";
 import { signinUserSchema, createRoomSchema , createUserSchema } from "@repo/common/types";
 import { middleware } from "./middleware";
+
 const app = express()
+app.use(express.json())
 
 app.post("/signup" , async (req , res) => {
+    
     const safeParsed = createUserSchema.safeParse(req.body);
 
     if(!safeParsed.success) {
@@ -14,24 +20,37 @@ app.post("/signup" , async (req , res) => {
     }
 
     const newUser = safeParsed.data
-
-    const existingUser = await prisma.user.findFirst({
-        where : {
-            email : newUser.email
+    
+    try {
+        const existingUser = await prisma.user.findUnique({
+            where : {
+                username : newUser.username
+            }
+        })
+        
+        if(existingUser) {
+            return res.json({
+                message : "user already exists"
+            })
         }
-    })
-
-    if(existingUser) {
+        const createUser = await prisma.user.create({
+            data : {
+                username : newUser.username,
+                password : newUser.password,
+                name : newUser.name
+            }
+        })
+        if(createUser.id) {
+            return res.json({
+                message : "user has been created"
+            })
+        }
+    } catch(e) {
         return res.json({
-            message : "user already exists"
+            message : e
         })
     }
 
-    const createUser = await prisma.user.create({
-        data : {
-            
-        }
-    })
 })
 
 app.post("/signin" , (req , res) => {
@@ -54,4 +73,4 @@ app.post("/room" , middleware , (req , res) => {
     }
 })
 
-app.listen(3000)
+app.listen(3001)
