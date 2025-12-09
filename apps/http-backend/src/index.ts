@@ -6,6 +6,7 @@ import { middleware } from "./middleware";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import { JWT_SECRET } from "@repo/backend-common/config";
+import ca from "zod/v4/locales/ca.js";
 
 dotenv.config();
 const app = express()
@@ -81,10 +82,10 @@ app.post("/signin" , async (req , res) => {
             });
         }
 
-        const passwordVerification = await bcrypt.compare(user.password , userData.password)
+        const passwordVerification = await bcrypt.compare(userData.password , user.password)
     
         if(!passwordVerification) {
-            res.status(401).json({
+            return res.status(401).json({
                 message : "incorrect username or password"
             })
         }
@@ -102,12 +103,32 @@ app.post("/signin" , async (req , res) => {
     }
 })
 
-app.post("/room" , middleware , (req , res) => {
+app.post("/room" , middleware , async (req , res) => {
     const safeParsed = createRoomSchema.safeParse(req.body)
 
     if(!safeParsed.success) {
         return res.status(400).json({
             message : "invalid input"
+        })
+    }
+
+    const userId = req.userId
+    const safeData = safeParsed.data
+
+    try {
+        const newRoom = await prisma.room.create({
+            data : {
+                slug : safeData.roomName,
+                adminId : userId
+            }
+        })
+
+        return res.json({
+            newRoom
+        })
+    } catch (e) {
+        return res.status(400).json({
+            message : "something went wrong"
         })
     }
 })
