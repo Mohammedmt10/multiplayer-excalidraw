@@ -15,7 +15,9 @@ export function middleware(req : Request , res : Response , next : NextFunction)
     const decoded = jwt.verify(token , JWT_SECRET)
 
     if(typeof decoded == "string") {
-        return;
+        return res.json({
+          message : "incorrect token"
+        });
     }
 
     if(decoded) {

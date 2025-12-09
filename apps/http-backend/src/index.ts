@@ -7,6 +7,7 @@ import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import { JWT_SECRET } from "@repo/backend-common/config";
 import ca from "zod/v4/locales/ca.js";
+import { includes } from "zod";
 
 dotenv.config();
 const app = express()
@@ -125,6 +126,30 @@ app.post("/room" , middleware , async (req , res) => {
 
         return res.json({
             newRoom
+        })
+    } catch (e) {
+        return res.status(400).json({
+            message : "something went wrong"
+        })
+    }
+})
+
+app.get("/chats/:roomId" , middleware , async(req , res , next) => {
+    const roomId = Number(req.params["roomId"]);
+    const userId = req.userId;
+
+    try {
+        const messages = await prisma.chat.findMany({
+            where : {
+                roomId : roomId
+            },
+            orderBy : {
+                Id : "desc"
+            }, 
+            take : 50
+        })
+        return res.json({
+            messages
         })
     } catch (e) {
         return res.status(400).json({
