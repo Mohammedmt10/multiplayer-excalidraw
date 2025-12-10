@@ -139,6 +139,20 @@ app.get("/chats/:roomId" , middleware , async(req , res , next) => {
     const userId = req.userId;
 
     try {
+        const roomAccess = await prisma.room.findFirst({
+            where : {
+                id : roomId,
+                members : {
+                    some : { id : userId }
+                }
+            },
+        });
+
+        if(!roomAccess) {
+            return res.status(403).json({
+                message : "access denied"
+            })
+        }
         const messages = await prisma.chat.findMany({
             where : {
                 roomId : roomId

@@ -53,6 +53,18 @@ wss.on("connection" , function connection(ws , request) {
                 const parsedData = JSON.parse(data.toString())
                 if(parsedData.type === "join_room") {
                     const user = users.find(x => x.ws == ws)
+                    await prisma.room.update({
+                        where : {
+                            id : parsedData.roomId
+                        },
+                        data : {
+                            members : {
+                                connect : {
+                                    id : userId
+                                }
+                            }
+                        }
+                    })
                     user?.rooms.push(parsedData.roomId)
                 }
                 
@@ -62,6 +74,16 @@ wss.on("connection" , function connection(ws , request) {
                         ws.close()
                         return null;
                     }
+                    await prisma.room.update({
+                        where : {
+                            id : parsedData.roomId
+                        },
+                        data : {
+                            members : {
+                                disconnect : { id : userId }
+                            }
+                        }
+                    })
                     user.rooms = user?.rooms.filter(x => x === parsedData.room)
                 }
                 
