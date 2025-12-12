@@ -58,7 +58,7 @@ wss.on("connection" , function connection(ws , request) {
                             id : parsedData.roomId
                         },
                         data : {
-                            members : {
+                            users : {
                                 connect : {
                                     id : userId
                                 }
@@ -79,7 +79,7 @@ wss.on("connection" , function connection(ws , request) {
                             id : parsedData.roomId
                         },
                         data : {
-                            members : {
+                            users : {
                                 disconnect : { id : userId }
                             }
                         }

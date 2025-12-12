@@ -142,7 +142,7 @@ app.get("/chats/:roomId" , middleware , async(req , res , next) => {
         const roomAccess = await prisma.room.findFirst({
             where : {
                 id : roomId,
-                members : {
+                users : {
                     some : { id : userId }
                 }
             },
