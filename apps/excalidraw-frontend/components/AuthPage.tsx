@@ -1,4 +1,8 @@
-export default function AuthPage({ isSignIn } : { isSignIn : boolean }) {
+"use client";
+import { useState } from "react";
+
+export default function AuthPage() {
+  const [isSignIn, setIsSignIn] = useState(true);
     return <div className="h-screen w-screen flex items-center">
         <div className="w-full h-screen flex justify-center flex-col items-center gap-10">
             <div className="text-4xl font-semibold">
@@ -19,18 +23,18 @@ export default function AuthPage({ isSignIn } : { isSignIn : boolean }) {
                 </div>}
                 <button className="w-full duration-300 hover:bg-green-600 bg-[#0ca070] py-2 mt-4 rounded-md text-white cursor-pointer">{isSignIn ? "Sign In" : "Sign Up"}</button>
                 <div className="my-2 text-center">
-                    {isSignIn ? "Don't have an account?" : "Already have an account?"} <span className="text-blue-600 cursor-pointer underline">{isSignIn ? "Sign Up" : "Sign In"}</span>
+                    {isSignIn ? "Don't have an account?" : "Already have an account?"} <span className="text-blue-600 cursor-pointer underline" onClick={() => setIsSignIn(c => !c)}>{isSignIn ? "Sign Up" : "Sign In"}</span>
                 </div>
             </div>
         </div>
         <div className="w-full h-full bg-[#0ca070] flex justify-center items-center text-center text-white">
                 <div>
                     <div className="text-3xl font-semibold mb-4">
-                        Welcome to Excalidraw Multiplayer
+                        {isSignIn ? "Welcome Back to Excalidraw Multiplayer" : "Welcome to Excalidraw Multiplayer"}
                     </div>
                     <div className="text-lg">
-                        Collaborate with your friends in real time <br />
-                        and bring your ideas to life on shared Excalidraw boards.
+                            Collaborate with your friends in real time <br /> 
+                            and bring your ideas to life on shared Excalidraw boards.
                     </div>
                 </div>
         </div>
