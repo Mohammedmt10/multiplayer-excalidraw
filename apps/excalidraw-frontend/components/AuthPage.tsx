@@ -1,8 +1,10 @@
 "use client";
+import { useParams } from "next/navigation";
 import { useState } from "react";
 
 export default function AuthPage() {
-  const [isSignIn, setIsSignIn] = useState(true);
+  const params = useParams().AuthPage;
+  const [isSignIn, setIsSignIn] = useState(params == "SignIn" ? true : false);
     return <div className="h-screen w-screen flex items-center">
         <div className="w-full h-screen flex justify-center flex-col items-center gap-10">
             <div className="text-4xl font-semibold">

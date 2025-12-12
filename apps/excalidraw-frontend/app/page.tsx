@@ -1,7 +1,7 @@
-import AuthPage from "../components/AuthPage";
+import HeroSection from "@/components/heroSection";
 
 export default function Home() {
-  return <div>
-    <AuthPage />
+  return <div className="font-display select-none">
+    <HeroSection />
   </div>
 }
