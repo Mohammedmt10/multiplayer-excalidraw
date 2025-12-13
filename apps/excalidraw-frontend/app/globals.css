@@ -3,3 +3,5 @@
 @theme{
     --font-display: "Inter", sans-serif;
 }
+
+@source "../../../packages/ui/src";

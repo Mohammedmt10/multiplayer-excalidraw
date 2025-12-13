@@ -1,28 +1,46 @@
 import Link from "next/link"
+import { Button } from "@repo/ui/button"
+import Share from "@/icons/shareIcon"
+import Users from "@/icons/usersIcon"
 
 export default function HeroSection() {
-    return <div className="font-display text-center">
+    return <div className="font-display text-center pt-30">
       <div>
-        <div className="text-6xl font-bold mt-30">
+        <div className="text-6xl font-bold">
             Collaborative Excalidraw <br />
-            <span className="text-blue-700">Made Simple</span>
+            <span className="text-green-700">Made Simple</span>
         </div>
-        <div className="mt-2 text-neutral-500 text-md">
+        <div className="mt-2 text-black-500 text-md">
             create, collaborate, and share beautiful diagrams and sketches with our intutive <br />
             drawing tool.
         </div>
         <div className="mt-10">
-            <Link href={"/SignIn"} className="bg-blue-700 text-white text-xl px-8 py-2 rounded mx-10 cursor-pointer">
-                Sign In
+            <Link href={"/SignIn"}>
+              <Button varient="primary" size="md">Sign In</Button>
             </Link>
-            <Link href={"/SignUp"} className="text-blue-700 bg-neutral-200 text-xl px-8 py-2 rounded cursor-pointer">
-                Sign Up
+            <Link href={"/SignUp"}>
+              <Button varient="secondary" size="md">Sign Up</Button>
             </Link>
         </div>
       </div>
       <div>
-        <div>
-
+        <div className="flex gap-5 justify-center mt-10 bg-green-100 py-20">
+            <div className="border-2 w-fit max-w-12x0 p-4 rounded border-green-700">
+              <div className="flex gap-3 text-lg items-center font-semibold">
+                <Share /> Real-time Collaboration
+              </div>
+              <div className="mt-5 text-start text-black-400">
+                Work with the team in real time. Share your drawing instantly with a simple task
+              </div>
+            </div>
+            <div className="border-2 w-fit max-w-12x0 p-4 rounded border-green-700">
+              <div className="flex gap-3 text-lg items-center font-semibold">
+                <Users /> Multiplayer Editing
+              </div>
+              <div className="mt-5 text-start text-black-400">
+                Multiplayer users can edit the same canvas simultaneously See who's drawing what in real-time
+              </div>
+            </div>
         </div>
       </div>
   </div>

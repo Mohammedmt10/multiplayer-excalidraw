@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@repo/ui/button";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 
@@ -15,21 +16,21 @@ export default function AuthPage() {
                     Username :<br />
                     <input type="text" placeholder="Username" className="leading-4 bg-neutral-100 py-3 w-80 px-4 rounded-md outline-none" />
                 </div>
-                <div className="leading-10">
+                <div className={`leading-10 ${isSignIn ? "mb-4" :""}`}>
                     Password :<br />
                     <input type="password" placeholder="Password" className="leading-4 bg-neutral-100 py-3 w-80 px-4 rounded-md outline-none" />
                 </div>
-                {!isSignIn && <div>
+                {!isSignIn && <div className="mb-4">
                     Name :<br />
                     <input type="text" placeholder="Name" className="leading-4 bg-neutral-100 py-3 w-80 px-4 rounded-md outline-none" />
                 </div>}
-                <button className="w-full duration-300 hover:bg-green-600 bg-[#0ca070] py-2 mt-4 rounded-md text-white cursor-pointer">{isSignIn ? "Sign In" : "Sign Up"}</button>
+                <Button size="lg" varient="primary">{isSignIn ? "Sign In" : "Sign Up"}</Button>
                 <div className="my-2 text-center">
                     {isSignIn ? "Don't have an account?" : "Already have an account?"} <span className="text-blue-600 cursor-pointer underline" onClick={() => setIsSignIn(c => !c)}>{isSignIn ? "Sign Up" : "Sign In"}</span>
                 </div>
             </div>
         </div>
-        <div className="w-full h-full bg-[#0ca070] flex justify-center items-center text-center text-white">
+        <div className="w-full h-full bg-[#008e61] flex justify-center items-center text-center text-white">
                 <div>
                     <div className="text-3xl font-semibold mb-4">
                         {isSignIn ? "Welcome Back to Excalidraw Multiplayer" : "Welcome to Excalidraw Multiplayer"}
