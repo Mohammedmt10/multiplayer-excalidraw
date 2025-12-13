@@ -53,18 +53,23 @@ wss.on("connection" , function connection(ws , request) {
                 const parsedData = JSON.parse(data.toString())
                 if(parsedData.type === "join_room") {
                     const user = users.find(x => x.ws == ws)
-                    await prisma.room.update({
-                        where : {
-                            id : parsedData.roomId
-                        },
-                        data : {
-                            users : {
-                                connect : {
-                                    id : userId
+                    try {
+                        const connected = await prisma.room.update({
+                            where : {
+                                id : Number(parsedData.roomId)
+                            },
+                            data : {
+                                users : {
+                                    connect : {
+                                        id : userId
+                                    }
                                 }
                             }
-                        }
-                    })
+                        });
+                    } catch (e) {
+                        ws.close()
+                        return;
+                    }
                     user?.rooms.push(parsedData.roomId)
                 }
                 
@@ -88,8 +93,8 @@ wss.on("connection" , function connection(ws , request) {
                 }
                 
                 if(parsedData.type == "chat") {
-                    const roomId = parsedData.roomId;
-                    const message = parsedData.message
+                    const roomId = Number(parsedData.roomId);
+                    const message = parsedData.messages
                     
                     const chat = await prisma.chat.create({
                         data : {
@@ -101,7 +106,7 @@ wss.on("connection" , function connection(ws , request) {
 
                     if(chat.Id) {
                         users.forEach(user => {
-                            if(user.rooms.includes(roomId)) {
+                            if(user.rooms) {
                                 user.ws.send(JSON.stringify({
                                     type : "chat",
                                     message : message,

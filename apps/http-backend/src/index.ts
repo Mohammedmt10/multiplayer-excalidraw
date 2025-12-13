@@ -6,12 +6,12 @@ import { middleware } from "./middleware";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import { JWT_SECRET } from "@repo/backend-common/config";
-import ca from "zod/v4/locales/ca.js";
-import { includes } from "zod";
+import cors from "cors";
 
 dotenv.config();
 const app = express()
 app.use(express.json())
+app.use(cors())
 
 app.post("/signup" , async (req , res) => {
     
@@ -115,12 +115,16 @@ app.post("/room" , middleware , async (req , res) => {
 
     const userId = req.userId
     const safeData = safeParsed.data
+    console.log(userId)
 
     try {
         const newRoom = await prisma.room.create({
             data : {
                 slug : safeData.roomName,
-                adminId : userId
+                adminId : userId,
+                users : {
+                    connect : { id : userId}
+                }
             }
         })
 
@@ -129,7 +133,8 @@ app.post("/room" , middleware , async (req , res) => {
         })
     } catch (e) {
         return res.status(400).json({
-            message : "something went wrong"
+            message : "something went wrong",
+            error : e
         })
     }
 })
