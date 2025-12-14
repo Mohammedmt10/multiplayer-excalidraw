@@ -6,6 +6,7 @@ interface ButtonProps {
   children: ReactNode;
   varient: "primary" | "secondary";
   size : "sm" | "md" | "lg";
+  type : "submit" | "button"
 }
 const buttonClass = {
   varients : {
@@ -20,11 +21,12 @@ const buttonClass = {
 }
 
 
-export const Button = ({ children, varient , size }: ButtonProps) => {
+export const Button = ({ children, varient , size , type}: ButtonProps) => {
   const className = `${buttonClass.varients[varient] + buttonClass.size[size]}`
   return (
     <button
       className={className}
+      type={type}
     >
       {children}
     </button>

@@ -139,6 +139,35 @@ app.post("/room" , middleware , async (req , res) => {
     }
 })
 
+app.get("/rooms" , middleware , async (req , res) => {
+    const userId = req.userId;
+
+    try {
+        const rooms = await prisma.room.findMany({
+            where : {
+                users : {
+                    some : {
+                        id : userId,
+                    }
+                }
+            },
+            select : {
+                id : true,
+                slug : true,
+                admin : true,
+                
+            }
+        })
+        return res.json({
+            rooms
+        })
+    } catch (e) {
+        return res.json({
+            message : "something went wrong"
+        })
+    }
+})
+
 app.get("/chats/:roomId" , middleware , async(req , res , next) => {
     const roomId = Number(req.params["roomId"]);
     const userId = req.userId;

@@ -4,6 +4,11 @@ import Share from "@/icons/shareIcon"
 import Users from "@/icons/usersIcon"
 
 export default function HeroSection() {
+  let token
+    const userInfo = async () => {
+      token = localStorage.getItem("token")
+    }
+    userInfo
     return <div className="font-display text-center pt-30">
       <div>
         <div className="text-6xl font-bold">
@@ -14,14 +19,22 @@ export default function HeroSection() {
             create, collaborate, and share beautiful diagrams and sketches with our intutive <br />
             drawing tool.
         </div>
-        <div className="mt-10">
+        {token && <div className="mt-10">
             <Link href={"/SignIn"}>
-              <Button varient="primary" size="md">Sign In</Button>
+              <Button varient="primary" size="md" type="button">Sign In</Button>
             </Link>
             <Link href={"/SignUp"}>
-              <Button varient="secondary" size="md">Sign Up</Button>
+              <Button varient="secondary" size="md" type="button">Sign Up</Button>
             </Link>
-        </div>
+        </div>}
+        {!token && <div className="mt-10">
+            <Link href={"/Room/joinRoom"}>
+              <Button varient="primary" size="md" type="button">Join Room</Button>
+            </Link>
+            <Link href={"/Room/createRoom"}>
+              <Button varient="secondary" size="md" type="button">Create Room</Button>
+            </Link>
+        </div>}
       </div>
       <div>
         <div className="flex gap-5 justify-center mt-10 bg-green-100 py-20">

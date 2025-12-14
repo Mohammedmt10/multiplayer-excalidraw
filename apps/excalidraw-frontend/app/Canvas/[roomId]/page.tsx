@@ -4,6 +4,7 @@ import Draw from "./canvas"
 import { useParams } from "next/navigation"
 import { ws_url } from "@/app/config"
 import ArrowIcon from "@/icons/arrowIcon"
+import PenIcon from "@/icons/penIcon"
 
 
 export default function Canvas() {
@@ -63,20 +64,23 @@ export default function Canvas() {
         </div>
     }
     return <div className="h-screen w-screen overflow-clip bg-green-50">
-        <canvas ref={canvasRef} height={800} width={1800}>
+        <canvas ref={canvasRef} height={window.innerHeight} width={window.innerWidth}>
         </canvas>
             <div className="fixed top-5 translate-x-20 right-[50%] bg-white flex rounded p-1">
-                <button className={`text-black p-2 rounded ${currShape == "rect" ? "bg-[#4ed6ab] text-white" :""} cursor-pointer`} onClick={() => handleChange("rect")}>
+                <button className={` text-black p-2 rounded ${currShape == "rect" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("rect")}>
                     <div className="border-2 w-5 h-5 rounded "></div>
                 </button>
-                <button className={`text-black p-2 rounded ${currShape == "circle" ? "bg-[#4ed6ab] text-white" :""} cursor-pointer`} onClick={() => handleChange("circle")}>
+                <button className={` text-black p-2 rounded ${currShape == "circle" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("circle")}>
                     <div className="border-2 w-5 h-5 rounded-full "></div>
                 </button>
-                <button className={`text-black p-2 rounded ${currShape == "line" ? "bg-[#4ed6ab] text-white" :""} cursor-pointer`} onClick={() => handleChange("line")}>
+                <button className={` text-black p-2 rounded ${currShape == "line" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("line")}>
                     <div className="h-0 w-5 border-t-2"></div>
                 </button>
-                <button className={`text-black p-2 rounded ${currShape == "arrow" ? "bg-[#4ed6ab] text-white" :""} cursor-pointer`} onClick={() => handleChange("arrow")}>
+                <button className={` text-black p-2 rounded ${currShape == "arrow" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("arrow")}>
                     <div className="-rotate-90"><ArrowIcon /></div>
+                </button>
+                <button className={` text-black p-2 rounded ${currShape == "pen" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("pen")}>
+                    <div className=""><PenIcon /></div>
                 </button>
             </div>
     </div>
