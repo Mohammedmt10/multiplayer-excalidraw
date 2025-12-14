@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react"
 import Draw from "./canvas"
 import { useParams } from "next/navigation"
 import { ws_url } from "@/app/config"
+import ArrowIcon from "@/icons/arrowIcon"
 
 
 export default function Canvas() {
@@ -64,7 +65,7 @@ export default function Canvas() {
     return <div className="h-screen w-screen overflow-clip bg-green-50">
         <canvas ref={canvasRef} height={800} width={1800}>
         </canvas>
-            <div className="fixed top-5 right-[50%] bg-white flex rounded p-1">
+            <div className="fixed top-5 translate-x-20 right-[50%] bg-white flex rounded p-1">
                 <button className={`text-black p-2 rounded ${currShape == "rect" ? "bg-[#4ed6ab] text-white" :""} cursor-pointer`} onClick={() => handleChange("rect")}>
                     <div className="border-2 w-5 h-5 rounded "></div>
                 </button>
@@ -73,6 +74,9 @@ export default function Canvas() {
                 </button>
                 <button className={`text-black p-2 rounded ${currShape == "line" ? "bg-[#4ed6ab] text-white" :""} cursor-pointer`} onClick={() => handleChange("line")}>
                     <div className="h-0 w-5 border-t-2"></div>
+                </button>
+                <button className={`text-black p-2 rounded ${currShape == "arrow" ? "bg-[#4ed6ab] text-white" :""} cursor-pointer`} onClick={() => handleChange("arrow")}>
+                    <div className="-rotate-90"><ArrowIcon /></div>
                 </button>
             </div>
     </div>

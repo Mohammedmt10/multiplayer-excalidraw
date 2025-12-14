@@ -26,14 +26,6 @@ export default async function Draw(
     })
     renderExistingElements(existingShape , canvas , ctx)
 
-    const getPos = (e: MouseEvent) => {
-        const rect = canvas.getBoundingClientRect();
-        return {
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top,
-        };
-    };
-
 
     if(socket) {
 
@@ -65,7 +57,7 @@ export default async function Draw(
         clicked = false;
         
         console.log(currShape.current)
-        if(currShape.current == "line") {
+        if(currShape.current == "line" || currShape.current == "arrow") {
             height = e.clientY;
             width = e.clientX
         } else {
@@ -95,7 +87,7 @@ export default async function Draw(
     })
     canvas.addEventListener("mousemove" , (e) => {
         if(clicked) {
-            const {x , y} = getPos(e)
+            
             height = e.clientY - startY
             width = e.clientX - startX
             
@@ -107,9 +99,8 @@ export default async function Draw(
             }
             if(currShape.current == "circle") {
                 ctx.strokeStyle = "rgba(10, 104, 71, 1)"
-                let radius = Math.hypot(height , width)
                 ctx.beginPath()
-                ctx.arc(startX, startY, radius , 0 , 2*Math.PI)
+                ctx.ellipse(startX + width/2 , startY + height /2 , Math.abs(width/2) , Math.abs(height/2) ,0 , 0,2*Math.PI)
                 ctx.stroke()
             }
             if(currShape.current == "line") {
@@ -119,6 +110,11 @@ export default async function Draw(
                 ctx.moveTo(startX , startY)
                 ctx.lineTo(e.clientX , e.clientY)
                 ctx.lineWidth = 2;
+                ctx.stroke()
+            }
+            if(currShape.current == "arrow") {
+                ctx.beginPath()
+                canvas_arrow(ctx , startX , startY , e.clientX , e.clientY )
                 ctx.stroke()
             }
         }
@@ -146,9 +142,8 @@ function renderExistingElements(
         }
         if(shape.type == "circle") {
             ctx.strokeStyle = "rgba(10, 104, 71, 1)"
-            let radius = Math.hypot(shape.width , shape.height)
             ctx.beginPath()
-            ctx.arc(shape.x , shape.y , radius ,0,2*Math.PI)
+            ctx.ellipse(shape.x + shape.width/2 , shape.y + shape.height /2 , Math.abs(shape.width/2) , Math.abs(shape.height/2) ,0 , 0,2*Math.PI)
             ctx.stroke()
         }
         if(shape.type == "line") {
@@ -156,7 +151,11 @@ function renderExistingElements(
             ctx.beginPath();
             ctx.moveTo(shape.x , shape.y)
             ctx.lineTo(shape.width , shape.height)
-            ctx.lineWidth = 2;
+            ctx.stroke()
+        }
+        if(shape.type == "arrow") {
+            ctx.beginPath()
+            canvas_arrow(ctx , shape.x , shape.y , shape.width , shape.height )
             ctx.stroke()
         }
     })
@@ -173,4 +172,23 @@ async function getExistingElements(roomId : string) {
     const data = res.data.messages;
 
     return data
+}
+
+function canvas_arrow(
+    ctx : CanvasRenderingContext2D,
+    fromx : number, 
+    fromy : number, 
+    tox : number, 
+    toy : number
+) {
+  var headlen = 10;
+  var dx = tox - fromx;
+  var dy = toy - fromy;
+  var angle = Math.atan2(dy, dx);
+  ctx.strokeStyle = "rgba(10, 104, 71, 1)";
+  ctx.moveTo(fromx, fromy);
+  ctx.lineTo(tox, toy);
+  ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+  ctx.moveTo(tox, toy);
+  ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
 }
