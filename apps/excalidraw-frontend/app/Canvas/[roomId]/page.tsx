@@ -79,7 +79,7 @@ export default function Canvas() {
                 <button className={` text-black p-2 rounded ${currShape == "arrow" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("arrow")}>
                     <div className="-rotate-90"><ArrowIcon /></div>
                 </button>
-                <button className={` text-black p-2 rounded ${currShape == "pen" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("pen")}>
+                <button className={` text-black p-2 rounded ${currShape == "eraser" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("eraser")}>
                     <div className=""><PenIcon /></div>
                 </button>
             </div>

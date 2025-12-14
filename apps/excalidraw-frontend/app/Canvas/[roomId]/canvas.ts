@@ -73,6 +73,7 @@ export default async function Draw(
             height : height
         })
         renderExistingElements(existingShape , canvas , ctx)
+        if(currShape.current == "eraser") return;
         socket?.send(JSON.stringify({
             type : "chat",
             roomId,
@@ -117,6 +118,19 @@ export default async function Draw(
                 canvas_arrow(ctx , startX , startY , e.clientX , e.clientY )
                 ctx.stroke()
             }
+            if(currShape.current == "eraser") {
+                existingShape = existingShape.filter((shape) => {
+                    if(shape.type == "line") {
+                        let linePoint = linepointNearestMouse(e.clientX , e.clientY , shape);
+                        let dx = e.clientX - linePoint.x
+                        let dy = e.clientY - linePoint.y
+                        let distance  = Math.abs(Math.sqrt(dx * dx + dy * dy))
+                        let tolerance = 5
+                        return distance > tolerance
+                    }
+                })
+                renderExistingElements(existingShape , canvas , ctx)
+            }
         }
     });
     
@@ -139,24 +153,23 @@ function renderExistingElements(
         if(shape.type == "rect") {
              ctx.strokeStyle = "rgba(10, 104, 71, 1)"
              ctx.strokeRect(shape.x , shape.y , shape.width , shape.height)
-        }
-        if(shape.type == "circle") {
+        } else if (shape.type == "circle") {
             ctx.strokeStyle = "rgba(10, 104, 71, 1)"
             ctx.beginPath()
             ctx.ellipse(shape.x + shape.width/2 , shape.y + shape.height /2 , Math.abs(shape.width/2) , Math.abs(shape.height/2) ,0 , 0,2*Math.PI)
             ctx.stroke()
-        }
-        if(shape.type == "line") {
+        } else if (shape.type == "line") {
             ctx.strokeStyle = "rgba(10, 104, 71, 1)";
             ctx.beginPath();
             ctx.moveTo(shape.x , shape.y)
             ctx.lineTo(shape.width , shape.height)
             ctx.stroke()
-        }
-        if(shape.type == "arrow") {
+        } else if(shape.type == "arrow") {
             ctx.beginPath()
             canvas_arrow(ctx , shape.x , shape.y , shape.width , shape.height )
             ctx.stroke()
+        } else if (shape.type == "eraser") {
+            
         }
     })
 }
@@ -191,4 +204,22 @@ function canvas_arrow(
   ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
   ctx.moveTo(tox, toy);
   ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+}
+
+function linepointNearestMouse(x : number , y : number , shape : Shape ) {
+    const lerp = (a : number, b : number, x: number ) => {
+        return (a + x * ( b - a ))
+    };
+    let dx = shape.width - shape.x
+    let dy = shape.height - shape.y
+
+    let t = ((x - shape.x) * dx + (y - shape.y) * dy)/(dx * dx + dy * dy)
+
+    let lineX = lerp(shape.x , shape.width , t)
+    let lineY = lerp(shape.y , shape.height , t)
+
+    return ({
+        x : lineX,
+        y : lineY
+    })
 }

@@ -9,10 +9,6 @@ export default function AuthPage() {
 
     const params = useParams().AuthPage;
     const [isSignIn, setIsSignIn] = useState(params == "SignIn" ? true : false);
-    
-    const username = useRef("")
-    const password = useRef("")
-    const name = useRef("")
 
     
     const buttonHandler = async (e : FormEvent<HTMLFormElement>) => {
