@@ -120,13 +120,19 @@ export default async function Draw(
             }
             if(currShape.current == "eraser") {
                 existingShape = existingShape.filter((shape) => {
-                    if(shape.type == "line") {
-                        let linePoint = linepointNearestMouse(e.clientX , e.clientY , shape);
-                        let dx = e.clientX - linePoint.x
-                        let dy = e.clientY - linePoint.y
-                        let distance  = Math.abs(Math.sqrt(dx * dx + dy * dy))
-                        let tolerance = 5
-                        return distance > tolerance
+                    if(shape.type == "line" || shape.type == "arrow") {
+                        return checkLine(e , shape.x , shape.y , shape.width , shape.height)
+                    }
+                    if(shape.type == "rect") {
+                        let tLine = checkLine(e , shape.x , shape.y , shape.x + shape.width , shape.y)
+                        let bLine = checkLine(e , shape.x , shape.y + shape.height , shape.x + shape.width , shape.y + shape.height)
+                        let lLine = checkLine(e , shape.x , shape.y , shape.x , shape.y + shape.height)
+                        let rLine = checkLine(e , shape.x + shape.width , shape.y , shape.x + shape.width , shape.y + shape.height)
+                        
+                        return (tLine && bLine && lLine && rLine)
+                    }
+                    if(shape.type == "circle") {
+                        return checkEllipse(e.clientX , e.clientY , shape.x + shape.width/2 , shape.y + shape.height/2 , shape.width/2 , shape.height /2)
                     }
                 })
                 renderExistingElements(existingShape , canvas , ctx)
@@ -168,8 +174,6 @@ function renderExistingElements(
             ctx.beginPath()
             canvas_arrow(ctx , shape.x , shape.y , shape.width , shape.height )
             ctx.stroke()
-        } else if (shape.type == "eraser") {
-            
         }
     })
 }
@@ -206,20 +210,42 @@ function canvas_arrow(
   ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
 }
 
-function linepointNearestMouse(x : number , y : number , shape : Shape ) {
+function linepointNearestMouse(x : number , y : number , x1 : number , y1 : number , x2 : number , y2 : number) {
     const lerp = (a : number, b : number, x: number ) => {
         return (a + x * ( b - a ))
     };
-    let dx = shape.width - shape.x
-    let dy = shape.height - shape.y
+    let dx = x2 - x1
+    let dy = y2 - y1
 
-    let t = ((x - shape.x) * dx + (y - shape.y) * dy)/(dx * dx + dy * dy)
+    let t = ((x - x1) * dx + (y - y1) * dy)/(dx * dx + dy * dy)
 
-    let lineX = lerp(shape.x , shape.width , t)
-    let lineY = lerp(shape.y , shape.height , t)
+    t = Math.max(0 , Math.min(1 , t))
+
+    let lineX = lerp(x1 , x2 , t)
+    let lineY = lerp(y1 , y2 , t)
 
     return ({
         x : lineX,
         y : lineY
     })
+}
+
+function checkLine(e : MouseEvent , x1 : number , y1 : number , x2 : number , y2 : number) {
+    let linePoint = linepointNearestMouse(e.clientX , e.clientY , x1 , y1 , x2 , y2);
+    let dx = e.clientX - linePoint.x
+    let dy = e.clientY - linePoint.y
+    let distance  = Math.abs(Math.sqrt(dx * dx + dy * dy))
+    let tolerance = 5
+    return distance > tolerance
+}
+
+function checkEllipse(x : number , y : number , cx : number , cy : number , rx : number , ry : number) {
+    const nx = (x - cx) / rx;
+    const ny = (y - cy) / ry;
+
+    const tolerance = 0.08 + 2 / Math.max(rx , ry)
+
+    const value = nx * nx + ny * ny;
+    if(!(Math.abs(value - 1) >= tolerance)) console.log(value , Math.abs(value - 1) >= tolerance)
+    return Math.abs(value - 1) >= tolerance
 }
