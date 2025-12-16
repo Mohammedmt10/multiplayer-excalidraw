@@ -1,10 +1,18 @@
 "use client"
 import { useEffect, useRef, useState } from "react"
-import Draw from "./canvas"
+import Draw, { renderExistingElements } from "./canvas"
 import { useParams } from "next/navigation"
 import { ws_url } from "@/app/config"
 import ArrowIcon from "@/icons/arrowIcon"
-import PenIcon from "@/icons/penIcon"
+import EraserIcon from "@/icons/eraserIcon"
+import { existingShape } from "./canvas"
+
+interface IinputBox {
+    type : string,
+    x : number,
+    y : number
+}
+
 
 export default function Canvas() {
 
@@ -13,19 +21,24 @@ export default function Canvas() {
     const roomId = params.roomId
 
     const initializedRef = useRef(false)
-
+    
     const canvasRef = useRef<HTMLCanvasElement>(null)
-
+    
     const [socket , setSocket] = useState<WebSocket | null>(null);
-
+    
     const shapeRef = useRef("rect")
+    const inputRef = useRef<HTMLInputElement>(null)
     const [currShape , setCurrShape] = useState("rect")
-
+    
+    const [inputBox , setInputBox] = useState<IinputBox>({
+        type : currShape,
+        x : 0,
+        y : 0
+    })
     const handleChange = (shape : string) => {
         shapeRef.current = shape
         setCurrShape(shape)
     }
-
     
     useEffect(() => {
         const ws = new WebSocket(`${ws_url}?token=${localStorage.getItem("token")}`);
@@ -38,15 +51,27 @@ export default function Canvas() {
             }))
         }
     }, [])
+
+    function addInput(x : number , y : number) {
+        if(currShape != "text") return;
+        setInputBox({
+            x : x,
+            y : y - 10,
+            type : currShape
+        })
+    }
+    const ctxRef = useRef<CanvasRenderingContext2D>(null)
     //canvas logic
     useEffect(() => {
-        const canvas = canvasRef.current
-        if(!socket || initializedRef.current) {
+        if(initializedRef.current) {
             return;
         }
+        const canvas = canvasRef.current
+        const ctx = ctxRef.current
         if(canvas) {
-            const ctx = canvas.getContext("2d");
-            if(!ctx) {
+            if(!canvas) return;
+            ctxRef.current = canvas.getContext("2d");
+            if(!ctxRef.current) {
                 return;
             }
             if(typeof roomId != "string") {
@@ -54,17 +79,48 @@ export default function Canvas() {
             }
             initializedRef.current = true
             const token = localStorage.getItem("token") || ""
-            Draw(canvas , ctx , roomId , socket , shapeRef , token)
+            Draw(canvas , ctxRef.current , roomId , socket , shapeRef , token , inputRef)
         }
     }, [roomId, socket]);
+    
+    
+
     if(!socket) {
         return <div>
             Connecting to the server...
         </div>
     }
-    return <div className="h-screen w-screen overflow-clip bg-green-50">
-        <canvas ref={canvasRef} height={window.innerHeight} width={window.innerWidth}>
-        </canvas>
+    return <div className="h-screen w-screen overflow-clip bg-green-50" >
+        {inputBox.type == "text" && <input ref={inputRef} name="inputRef" type="text"
+        className={`absolute outline-0 focus:select-auto`}
+        style={{
+            left : inputBox.x,
+            top : inputBox.y
+        }}
+
+        onKeyDown={(e) => {
+            if(e.key == "Enter") {
+                setCurrShape("rect")
+                setInputBox((prev) => ({...prev , type : "rect"}))
+                if(inputRef.current)
+                existingShape.push({
+                    type : "text",
+                    x : inputBox.x,
+                    y : inputBox.y,
+                    text : inputRef.current.value,
+                    width : 0,
+                    height : 0
+                })
+                const canvas = canvasRef.current
+                console.log(canvas , ctxRef.current)
+                if(canvas && ctxRef.current)
+                renderExistingElements(existingShape , canvas , ctxRef.current)
+            }
+        }}
+        />}
+        <canvas ref={canvasRef} height={window.innerHeight} width={window.innerWidth} onClick={(e : any) => {
+            addInput(e.clientX , e.clientY);
+        }}></canvas>
             <div className="fixed top-5 translate-x-20 right-[50%] bg-white flex rounded p-1">
                 <button className={` text-black p-2 rounded ${currShape == "rect" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("rect")}>
                     <div className="border-2 w-5 h-5 rounded "></div>
@@ -78,8 +134,11 @@ export default function Canvas() {
                 <button className={` text-black p-2 rounded ${currShape == "arrow" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("arrow")}>
                     <div className="-rotate-90"><ArrowIcon /></div>
                 </button>
+                <button className={` text-black p-2 rounded ${currShape == "text" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("text")}>
+                    <div className=""><EraserIcon /></div>
+                </button>
                 <button className={` text-black p-2 rounded ${currShape == "eraser" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("eraser")}>
-                    <div className=""><PenIcon /></div>
+                    <div className=""><EraserIcon /></div>
                 </button>
             </div>
     </div>

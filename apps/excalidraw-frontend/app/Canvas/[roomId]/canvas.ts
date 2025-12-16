@@ -8,9 +8,11 @@ type Shape = {
     x : number,
     y : number,
     width : number,
-    height : number
+    height : number,
+    text ?: string
 }
 
+export let existingShape : Shape[] = [];
 
 export default async function Draw(
     canvas : HTMLCanvasElement , 
@@ -18,10 +20,10 @@ export default async function Draw(
     roomId : string,
     socket : WebSocket | null,
     currShape : {current : string},
-    token : string
+    token : string,
+    inputRef : any
 ) {
     
-    let existingShape : Shape[] = [];
     const previousElements = await getExistingElements(roomId , token)
     previousElements.map((element : any) => {
         existingShape.push(JSON.parse(element.message))
@@ -47,18 +49,21 @@ export default async function Draw(
     
     let width = 0;
     let height = 0;
+
+    let rect: DOMRect | null = null;
+
+    
     canvas.addEventListener("mousedown" , (e) => {
         startX = e.clientX
         startY = e.clientY
-    
         clicked = true
+        console.log("hi")
     })
     
     
     canvas.addEventListener("mouseup" , (e) => {
         clicked = false;
         
-        console.log(currShape.current)
         if(currShape.current == "line" || currShape.current == "arrow") {
             height = e.clientY;
             width = e.clientX
@@ -67,15 +72,29 @@ export default async function Draw(
             width = e.clientX - startX
 
         }
-        existingShape.push({
-            type : currShape.current,
-            x : startX,
-            y : startY,
-            width : width,
-            height : height
-        })
+        if(currShape.current == "text") {
+            if(!inputRef.current) return;
+            rect = inputRef.current.getBoundingClientRect();
+            existingShape.push({
+                type : currShape.current,
+                x : startX,
+                y : startY,
+                width : 0,
+                height : 0,
+                text : inputRef.current.value
+            })
+            console.log(existingShape)
+        } else {
+            existingShape.push({
+                type : currShape.current,
+                x : startX,
+                y : startY,
+                width : width,
+                height : height
+            })
+        }
         renderExistingElements(existingShape , canvas , ctx)
-        if(currShape.current == "eraser") return;
+        if(currShape.current == "eraser" || currShape.current == "text") return;
         socket?.send(JSON.stringify({
             type : "chat",
             roomId,
@@ -110,10 +129,8 @@ export default async function Draw(
             if(currShape.current == "line") {
                 ctx.strokeStyle = "rgba(10, 104, 71, 1)";
                 ctx.beginPath();
-                console.log(width , height)
                 ctx.moveTo(startX , startY)
                 ctx.lineTo(e.clientX , e.clientY)
-                ctx.lineWidth = 2;
                 ctx.stroke()
             }
             if(currShape.current == "arrow") {
@@ -167,6 +184,9 @@ export default async function Draw(
                         }
                         return colision
                     }
+                    if(shape.type == "text") {
+                        
+                    }
                 })
                 renderExistingElements(existingShape , canvas , ctx)
             }
@@ -176,7 +196,7 @@ export default async function Draw(
     
 }
 
-function renderExistingElements(
+export function renderExistingElements(
     existingShape : Shape[] ,
     canvas : HTMLCanvasElement,
     ctx : CanvasRenderingContext2D
@@ -207,6 +227,12 @@ function renderExistingElements(
             ctx.beginPath()
             canvas_arrow(ctx , shape.x , shape.y , shape.width , shape.height )
             ctx.stroke()
+        } else if(shape.type == "text") {
+            if(shape.text) {
+                ctx.fillStyle = "green"
+                ctx.font = "24px Arial";
+                ctx.fillText(shape.text , shape.x , shape.y + 20)
+            }
         }
     })
 }
@@ -231,7 +257,7 @@ function canvas_arrow(
     tox : number, 
     toy : number
 ) {
-  var headlen = 10;
+  var headlen = 8;
   var dx = tox - fromx;
   var dy = toy - fromy;
   var angle = Math.atan2(dy, dx);
@@ -279,6 +305,6 @@ function checkEllipse(x : number , y : number , cx : number , cy : number , rx :
     const tolerance = 0.08 + 2 / Math.max(rx , ry)
 
     const value = nx * nx + ny * ny;
-    if(!(Math.abs(value - 1) >= tolerance)) console.log(value , Math.abs(value - 1) >= tolerance)
+    if(!(Math.abs(value - 1) >= tolerance)) 
     return Math.abs(value - 1) >= tolerance
 }
