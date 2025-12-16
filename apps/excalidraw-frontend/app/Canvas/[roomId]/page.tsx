@@ -6,7 +6,6 @@ import { ws_url } from "@/app/config"
 import ArrowIcon from "@/icons/arrowIcon"
 import PenIcon from "@/icons/penIcon"
 
-
 export default function Canvas() {
 
     //get Room ID
@@ -29,7 +28,7 @@ export default function Canvas() {
 
     
     useEffect(() => {
-        const ws = new WebSocket(`${ws_url}?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlOWY2ZWU4My1kMDdkLTQyMzktODJlNy01NDA2NmY0YTM5NjciLCJpYXQiOjE3NjU2MjEwODR9.3wB1_521ld4kiDHEiO_4f18NlZWSpJmXamnSAtzBc1I`);
+        const ws = new WebSocket(`${ws_url}?token=${localStorage.getItem("token")}`);
         
         ws.onopen = () => {
             setSocket(ws)
@@ -38,7 +37,6 @@ export default function Canvas() {
                 roomId : roomId
             }))
         }
-        console.log(shapeRef.current)
     }, [])
     //canvas logic
     useEffect(() => {
@@ -55,7 +53,8 @@ export default function Canvas() {
                 return;
             }
             initializedRef.current = true
-            Draw(canvas , ctx , roomId , socket , shapeRef)
+            const token = localStorage.getItem("token") || ""
+            Draw(canvas , ctx , roomId , socket , shapeRef , token)
         }
     }, [roomId, socket]);
     if(!socket) {

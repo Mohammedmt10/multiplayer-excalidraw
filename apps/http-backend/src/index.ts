@@ -115,7 +115,6 @@ app.post("/room" , middleware , async (req , res) => {
 
     const userId = req.userId
     const safeData = safeParsed.data
-    console.log(userId)
 
     try {
         const newRoom = await prisma.room.create({

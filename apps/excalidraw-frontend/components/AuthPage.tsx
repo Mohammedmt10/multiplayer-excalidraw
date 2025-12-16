@@ -38,6 +38,9 @@ export default function AuthPage() {
                 password : password,
                 name : name
             })
+            if(res.data) {
+                window.location.href = "http://localhost:3000/"
+            }
         }
     }
 

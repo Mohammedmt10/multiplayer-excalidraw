@@ -100,7 +100,8 @@ wss.on("connection" , function connection(ws , request) {
                         data : {
                             roomId : roomId,
                             message : message,
-                            userId : userId
+                            userId : userId,
+                            shapeId : JSON.parse(message).shapeId
                         }
                     })
 
@@ -115,6 +116,14 @@ wss.on("connection" , function connection(ws , request) {
                             }
                         })
                     }
+                }
+                if(parsedData.type == "delete") {
+                    console.log(JSON.parse(parsedData.shapeId))
+                    await prisma.chat.delete({
+                        where : {
+                            shapeId : JSON.parse(parsedData.shapeId)
+                        }
+                    })
                 }
             })
     } catch (e) {

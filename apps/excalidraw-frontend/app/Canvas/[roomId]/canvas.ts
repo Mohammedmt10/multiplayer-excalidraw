@@ -1,6 +1,7 @@
 import { http_url } from "@/app/config";
 import axios from "axios"
-import { RefObject } from "react";
+
+let deletedShape : string[] = [];
 
 type Shape = {
     type : string,
@@ -16,11 +17,12 @@ export default async function Draw(
     ctx : CanvasRenderingContext2D,
     roomId : string,
     socket : WebSocket | null,
-    currShape : {current : string}
+    currShape : {current : string},
+    token : string
 ) {
     
     let existingShape : Shape[] = [];
-    const previousElements = await getExistingElements(roomId)
+    const previousElements = await getExistingElements(roomId , token)
     previousElements.map((element : any) => {
         existingShape.push(JSON.parse(element.message))
     })
@@ -78,6 +80,7 @@ export default async function Draw(
             type : "chat",
             roomId,
             messages : JSON.stringify({
+                shapeId : currShape.current + startX + startY + width + height,
                 type : currShape.current,
                 x : startX,
                 y : startY,
@@ -121,18 +124,48 @@ export default async function Draw(
             if(currShape.current == "eraser") {
                 existingShape = existingShape.filter((shape) => {
                     if(shape.type == "line" || shape.type == "arrow") {
-                        return checkLine(e , shape.x , shape.y , shape.width , shape.height)
+                        const colision = checkLine(e , shape.x , shape.y , shape.width , shape.height)
+                        const id = shape.type + shape.x + shape.y + shape.width + shape.height
+                        if(deletedShape.includes(id)) return;
+                        if(!colision) {
+                            socket?.send(JSON.stringify({
+                                type : "delete",
+                                shapeId : JSON.stringify(id)
+                            }))
+                            deletedShape.push(id)
+                        }
+                        return colision
                     }
                     if(shape.type == "rect") {
+                        const id = shape.type + shape.x + shape.y + shape.width + shape.height
                         let tLine = checkLine(e , shape.x , shape.y , shape.x + shape.width , shape.y)
                         let bLine = checkLine(e , shape.x , shape.y + shape.height , shape.x + shape.width , shape.y + shape.height)
                         let lLine = checkLine(e , shape.x , shape.y , shape.x , shape.y + shape.height)
                         let rLine = checkLine(e , shape.x + shape.width , shape.y , shape.x + shape.width , shape.y + shape.height)
                         
-                        return (tLine && bLine && lLine && rLine)
+                        const colision = (tLine && bLine && lLine && rLine)
+                        if(deletedShape.includes(id)) return;
+                        if(!colision) {
+                            socket?.send(JSON.stringify({
+                                type : "delete",
+                                shapeId : JSON.stringify(id)
+                            }))
+                            deletedShape.push(id)
+                        }
+                        return colision
                     }
                     if(shape.type == "circle") {
-                        return checkEllipse(e.clientX , e.clientY , shape.x + shape.width/2 , shape.y + shape.height/2 , shape.width/2 , shape.height /2)
+                        const id = shape.type + shape.x + shape.y + shape.width + shape.height
+                        const colision = checkEllipse(e.clientX , e.clientY , shape.x + shape.width/2 , shape.y + shape.height/2 , shape.width/2 , shape.height /2)
+                        if(deletedShape.includes(id)) return;
+                        if(!colision) {
+                            socket?.send(JSON.stringify({
+                                type : "delete",
+                                shapeId : JSON.stringify(id)
+                            }))
+                            deletedShape.push(id)
+                        }
+                        return colision
                     }
                 })
                 renderExistingElements(existingShape , canvas , ctx)
@@ -178,11 +211,11 @@ function renderExistingElements(
     })
 }
 
-async function getExistingElements(roomId : string) {
+async function getExistingElements(roomId : string , token : string) {
 
     const res = await axios.get(`${http_url}/chats/${roomId}` , {
         headers : {
-            Authorization : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlOWY2ZWU4My1kMDdkLTQyMzktODJlNy01NDA2NmY0YTM5NjciLCJpYXQiOjE3NjU2MjEwODR9.3wB1_521ld4kiDHEiO_4f18NlZWSpJmXamnSAtzBc1I"
+            Authorization : token
         }
     })
     
