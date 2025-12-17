@@ -17,9 +17,9 @@ Multiple users can join a shared room and draw on the same canvas with real-time
 
 ## Tech Stack
 
-- Frontend: Next.js, React, HTML Canvas
-- Backend: Node.js, WebSockets
+- Frontend: Next.js, HTML Canvas
+- Backend: Node.js, Express, WebSockets
 - Language: TypeScript
-- Database: PostgreSQL (optional / if enabled)
+- Database: PostgreSQL
 - Monorepo Tooling: Turborepo
 - Package Manager: pnpm
