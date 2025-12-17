@@ -79,7 +79,7 @@ export default function Canvas() {
             }
             initializedRef.current = true
             const token = localStorage.getItem("token") || ""
-            Draw(canvas , ctxRef.current , roomId , socket , shapeRef , token , inputRef)
+            Draw(canvas , ctxRef.current , roomId , socket , shapeRef , token )
         }
     }, [roomId, socket]);
     
@@ -107,6 +107,7 @@ export default function Canvas() {
                 ctxRef.current.font = "24px Arial"
                 const width = ctxRef.current.measureText(inputRef.current.value).width
                 existingShape.push({
+                    shapeId : "text" + inputBox.x + inputBox.y + inputRef.current.value + width,
                     type : "text",
                     x : inputBox.x,
                     y : inputBox.y,
@@ -137,6 +138,9 @@ export default function Canvas() {
             addInput(e.clientX , e.clientY);
         }}></canvas>
             <div className="fixed top-5 translate-x-20 right-[50%] bg-white flex rounded p-1">
+                <button className={` text-black p-2 rounded ${currShape == "cursor" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("cursor")}>
+                    <div className="border-2 w-5 h-5 rounded"></div>
+                </button>
                 <button className={` text-black p-2 rounded ${currShape == "rect" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("rect")}>
                     <div className="border-2 w-5 h-5 rounded "></div>
                 </button>

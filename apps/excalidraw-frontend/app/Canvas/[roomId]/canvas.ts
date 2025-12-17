@@ -4,6 +4,7 @@ import axios from "axios"
 let deletedShape : string[] = [];
 
 type Shape = {
+    shapeId : string,
     type : string,
     x : number,
     y : number,
@@ -19,9 +20,8 @@ export default async function Draw(
     ctx : CanvasRenderingContext2D,
     roomId : string,
     socket : WebSocket | null,
-    currShape : {current : string},
-    token : string,
-    inputRef : any
+    currShape : { current : string },
+    token : string
 ) {
     
     const previousElements = await getExistingElements(roomId , token)
@@ -37,7 +37,7 @@ export default async function Draw(
             const shapes = JSON.parse(event.data);
             if(shapes.type == "chat") {
                 if (typeof shapes.message !== "string") return;
-                existingShape.push(JSON.parse(shapes.message))
+                // existingShape.push(JSON.parse(shapes.message))
                 renderExistingElements(existingShape , canvas , ctx)
             }
         }
@@ -50,13 +50,27 @@ export default async function Draw(
     let width = 0;
     let height = 0;
 
-    let rect: DOMRect | null = null;
-
+    let dragging = false
+    let draggingShape : Shape;
     
     canvas.addEventListener("mousedown" , (e) => {
         startX = e.clientX
         startY = e.clientY
         clicked = true
+
+        if(currShape.current == "cursor") {
+            for(let i = 0; i < existingShape.length;) {
+                const shape = existingShape[i];
+                if(shape.type == "line" || shape.type == "arrow") {
+                    const colision = checkLine(e , shape.x , shape.y , shape.width , shape.height);
+                    i += 1
+                    if(!colision) {
+                        dragging = true
+                        draggingShape = shape;
+                    }
+                }
+            }
+        }
     })
     
     
@@ -69,12 +83,22 @@ export default async function Draw(
         } else {
             height = e.clientY - startY
             width = e.clientX - startX
-
         }
         if(currShape.current == "text") {
             return;
         } else {
+            const shape = {
+                shapeId : currShape.current + startX + startY + width + height,
+                type : currShape.current,
+                x : startX , 
+                y : startY,
+                width : width,
+                height : height,
+            }
+            
+            if(existingShape.find(x => x == shape)) return
             existingShape.push({
+                shapeId : currShape.current + startX + startY + width + height,
                 type : currShape.current,
                 x : startX,
                 y : startY,
@@ -84,7 +108,7 @@ export default async function Draw(
         }
         
         renderExistingElements(existingShape , canvas , ctx)
-        if(currShape.current == "eraser" || currShape.current == "text") return;
+        if(currShape.current == "eraser" || currShape.current == "text" || currShape.current == "cursor") return;
         socket?.send(JSON.stringify({
             type : "chat",
             roomId,
@@ -128,11 +152,25 @@ export default async function Draw(
                 canvas_arrow(ctx , startX , startY , e.clientX , e.clientY )
                 ctx.stroke()
             }
+            if(currShape.current == "cursor" && dragging) {
+                
+                    let dx =  e.clientX - startX ;
+                    let dy =  e.clientY -startY;
+                    console.log("hi")
+                    draggingShape.x += dx;
+                    draggingShape.y += dy
+                    draggingShape.width += dx;
+                    draggingShape.height += dy
+
+                    startX = e.clientX;
+                    startY = e.clientY
+                
+            }
             if(currShape.current == "eraser") {
                 existingShape = existingShape.filter((shape) => {
                     if(shape.type == "line" || shape.type == "arrow") {
                         const colision = checkLine(e , shape.x , shape.y , shape.width , shape.height)
-                        const id = shape.type + shape.x + shape.y + shape.width + shape.height
+                        const id = shape.shapeId
                         if(deletedShape.includes(id)) return;
                         if(!colision) {
                             socket?.send(JSON.stringify({
@@ -144,7 +182,7 @@ export default async function Draw(
                         return colision
                     }
                     if(shape.type == "rect") {
-                        const id = shape.type + shape.x + shape.y + shape.width + shape.height
+                        const id = shape.shapeId
                         let tLine = checkLine(e , shape.x , shape.y , shape.x + shape.width , shape.y)
                         let bLine = checkLine(e , shape.x , shape.y + shape.height , shape.x + shape.width , shape.y + shape.height)
                         let lLine = checkLine(e , shape.x , shape.y , shape.x , shape.y + shape.height)
@@ -162,7 +200,7 @@ export default async function Draw(
                         return colision
                     }
                     if(shape.type == "circle") {
-                        const id = shape.type + shape.x + shape.y + shape.width + shape.height
+                        const id = shape.shapeId
                         const colision = checkEllipse(e.clientX , e.clientY , shape.x + shape.width/2 , shape.y + shape.height/2 , shape.width/2 , shape.height /2)
                         if(deletedShape.includes(id)) return;
                         if(!colision) {
@@ -175,7 +213,7 @@ export default async function Draw(
                         return colision
                     }
                     if(shape.type == "text") {
-                        const id = shape.type + shape.x + shape.y + shape.width + shape.text
+                        const id = shape.shapeId
                         const checkText = ((e.clientX >= shape.x && e.clientX <= (shape.x + shape.width)) && (e.clientY >= shape.y && e.clientY <= (shape.y + shape.height)))
                         const colision = !checkText
                         if(deletedShape.includes(id)) return;
