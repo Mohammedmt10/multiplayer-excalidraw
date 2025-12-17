@@ -92,12 +92,12 @@ export default function Canvas() {
     }
     return <div className="h-screen w-screen overflow-clip bg-green-50" >
         {inputBox.type == "text" && <input ref={inputRef} name="inputRef" type="text"
-        className={`absolute outline-0 focus:select-auto`}
+        className={`absolute outline-0 focus:select-auto text-[24px] font-arial`}
         style={{
             left : inputBox.x,
-            top : inputBox.y
+            top : inputBox.y - 10
         }}
-
+        autoComplete="off"
         onKeyDown={(e) => {
             if(e.key == "Enter") {
                 setCurrShape("rect")
@@ -150,7 +150,7 @@ export default function Canvas() {
                     <div className="-rotate-90"><ArrowIcon /></div>
                 </button>
                 <button className={` text-black p-2 rounded ${currShape == "text" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("text")}>
-                    <div className=""><EraserIcon /></div>
+                    <div className="w-5 h-5 text-xl flex items-center px-0.5">A</div>
                 </button>
                 <button className={` text-black p-2 rounded ${currShape == "eraser" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("eraser")}>
                     <div className=""><EraserIcon /></div>
