@@ -57,7 +57,6 @@ export default async function Draw(
         startX = e.clientX
         startY = e.clientY
         clicked = true
-        console.log("hi")
     })
     
     
@@ -73,17 +72,7 @@ export default async function Draw(
 
         }
         if(currShape.current == "text") {
-            if(!inputRef.current) return;
-            rect = inputRef.current.getBoundingClientRect();
-            existingShape.push({
-                type : currShape.current,
-                x : startX,
-                y : startY,
-                width : 0,
-                height : 0,
-                text : inputRef.current.value
-            })
-            console.log(existingShape)
+            return;
         } else {
             existingShape.push({
                 type : currShape.current,
@@ -93,6 +82,7 @@ export default async function Draw(
                 height : height
             })
         }
+        
         renderExistingElements(existingShape , canvas , ctx)
         if(currShape.current == "eraser" || currShape.current == "text") return;
         socket?.send(JSON.stringify({
@@ -185,7 +175,18 @@ export default async function Draw(
                         return colision
                     }
                     if(shape.type == "text") {
-                        
+                        const id = shape.type + shape.x + shape.y + shape.width + shape.text
+                        const checkText = ((e.clientX >= shape.x && e.clientX <= (shape.x + shape.width)) && (e.clientY >= shape.y && e.clientY <= (shape.y + shape.height)))
+                        const colision = !checkText
+                        if(deletedShape.includes(id)) return;
+                        if(!colision) {
+                            socket?.send(JSON.stringify({
+                                type : "delete",
+                                shapeId : JSON.stringify(id),
+                            }))
+                            deletedShape.push(id)
+                        }
+                        return colision
                     }
                 })
                 renderExistingElements(existingShape , canvas , ctx)
@@ -238,16 +239,20 @@ export function renderExistingElements(
 }
 
 async function getExistingElements(roomId : string , token : string) {
-
-    const res = await axios.get(`${http_url}/chats/${roomId}` , {
-        headers : {
-            Authorization : token
-        }
-    })
     
-    const data = res.data.messages;
+    try {
+        const res = await axios.get(`${http_url}/chats/${roomId}` , {
+            headers : {
+                Authorization : token
+            }
+        })
+        const data = res.data.messages;
+        return data
+    } catch (e) {
+        window.location.href = "http://localhost:3000"
+    }
 
-    return data
+    
 }
 
 function canvas_arrow(

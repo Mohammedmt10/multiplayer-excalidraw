@@ -102,17 +102,32 @@ export default function Canvas() {
             if(e.key == "Enter") {
                 setCurrShape("rect")
                 setInputBox((prev) => ({...prev , type : "rect"}))
-                if(inputRef.current)
+                if(!inputRef.current) return
+                if(!ctxRef.current) return
+                ctxRef.current.font = "24px Arial"
+                const width = ctxRef.current.measureText(inputRef.current.value).width
                 existingShape.push({
                     type : "text",
                     x : inputBox.x,
                     y : inputBox.y,
                     text : inputRef.current.value,
-                    width : 0,
-                    height : 0
-                })
+                    width : width,
+                    height : 24
+                });
+                socket.send(JSON.stringify({
+                    type : "chat",
+                    roomId,
+                    messages : JSON.stringify({
+                        shapeId : currShape + inputBox.x + inputBox.y + width + inputRef.current.value,
+                        type : currShape,
+                        x : inputBox.x,
+                        y : inputBox.y,
+                        width : width,
+                        height : 24,
+                        text : inputRef.current.value
+                    })
+                }))
                 const canvas = canvasRef.current
-                console.log(canvas , ctxRef.current)
                 if(canvas && ctxRef.current)
                 renderExistingElements(existingShape , canvas , ctxRef.current)
             }
