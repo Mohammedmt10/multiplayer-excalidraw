@@ -107,7 +107,7 @@ export default function Canvas() {
                 ctxRef.current.font = "24px Arial"
                 const width = ctxRef.current.measureText(inputRef.current.value).width
                 existingShape.push({
-                    shapeId : "text" + inputBox.x + inputBox.y + inputRef.current.value + width,
+                    shapeId : currShape + inputBox.x + inputBox.y + width + inputRef.current.value,
                     type : "text",
                     x : inputBox.x,
                     y : inputBox.y,

@@ -118,10 +118,21 @@ wss.on("connection" , function connection(ws , request) {
                     }
                 }
                 if(parsedData.type == "delete") {
-                    console.log(JSON.parse(parsedData.shapeId))
                     await prisma.chat.delete({
                         where : {
                             shapeId : JSON.parse(parsedData.shapeId)
+                        }
+                    })
+                }
+                if(parsedData.type == "update") {
+                    const shape = JSON.stringify(parsedData.draggingShape)
+                    console.log(shape)
+                    await prisma.chat.update({
+                        where : {
+                            shapeId : parsedData.shapeId
+                        },
+                        data : {
+                            message : shape
                         }
                     })
                 }

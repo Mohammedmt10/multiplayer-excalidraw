@@ -1,7 +1,7 @@
 import { http_url } from "@/app/config";
 import axios from "axios"
 
-let deletedShape : string[] = [];
+export let deletedShape : string[] = [];
 
 type Shape = {
     shapeId : string,
@@ -37,7 +37,6 @@ export default async function Draw(
             const shapes = JSON.parse(event.data);
             if(shapes.type == "chat") {
                 if (typeof shapes.message !== "string") return;
-                // existingShape.push(JSON.parse(shapes.message))
                 renderExistingElements(existingShape , canvas , ctx)
             }
         }
@@ -63,12 +62,38 @@ export default async function Draw(
                 const shape = existingShape[i];
                 if(shape.type == "line" || shape.type == "arrow") {
                     const colision = checkLine(e , shape.x , shape.y , shape.width , shape.height);
-                    i += 1
+                    
                     if(!colision) {
                         dragging = true
                         draggingShape = shape;
                     }
                 }
+
+                if(shape.type == "circle") {
+                    const colision = checkEllipse(e.clientX , e.clientY , shape.x  , shape.y , shape.width / 2 , shape.height / 2)
+                    if(!colision) {
+                        dragging = true;
+                        draggingShape = shape
+                    }
+                }
+
+                if(shape.type == "text") {
+                    const colision = checkText(e , shape)
+                    if(colision) {
+                        dragging = true;
+                        draggingShape = shape
+                    }
+                }
+
+                if(shape.type == "rect") {
+                    const colision = checkRect(e , shape)
+                    if(colision) {
+                        dragging = true;
+                        draggingShape = shape
+                    }
+                }
+
+                i += 1
             }
         }
     })
@@ -76,7 +101,19 @@ export default async function Draw(
     
     canvas.addEventListener("mouseup" , (e) => {
         clicked = false;
+        dragging = false
         
+        if(currShape.current == "cursor") {
+            // sending 
+
+            // socket?.send(JSON.stringify({
+            //     type : "update",
+            //     shapeId : draggingShape.shapeId,
+            //     draggingShape : JSON.stringify(draggingShape)
+            // }))
+            return;
+        }
+
         if(currShape.current == "line" || currShape.current == "arrow") {
             height = e.clientY;
             width = e.clientX
@@ -156,12 +193,20 @@ export default async function Draw(
                 
                     let dx =  e.clientX - startX ;
                     let dy =  e.clientY -startY;
-                    console.log("hi")
+                    
+                    const idx = existingShape.findIndex(x => x.shapeId == draggingShape.shapeId)
+
                     draggingShape.x += dx;
                     draggingShape.y += dy
-                    draggingShape.width += dx;
-                    draggingShape.height += dy
-
+                    
+                    if(draggingShape.type == "line" || draggingShape.type == "arrow") {
+                        draggingShape.width += dx;
+                        draggingShape.height += dy
+                    }
+                    
+                    if(idx >= 0) {
+                        existingShape[idx] = {...draggingShape}
+                    }
                     startX = e.clientX;
                     startY = e.clientY
                 
@@ -210,12 +255,12 @@ export default async function Draw(
                             }))
                             deletedShape.push(id)
                         }
+                        
                         return colision
                     }
                     if(shape.type == "text") {
                         const id = shape.shapeId
-                        const checkText = ((e.clientX >= shape.x && e.clientX <= (shape.x + shape.width)) && (e.clientY >= shape.y && e.clientY <= (shape.y + shape.height)))
-                        const colision = !checkText
+                        const colision = !checkText(e , shape)
                         if(deletedShape.includes(id)) return;
                         if(!colision) {
                             socket?.send(JSON.stringify({
@@ -293,6 +338,11 @@ async function getExistingElements(roomId : string , token : string) {
     
 }
 
+
+function checkText(e : MouseEvent , shape : Shape) {
+    return ((e.clientX >= shape.x && e.clientX <= (shape.x + shape.width)) && (e.clientY >= shape.y && e.clientY <= (shape.y + shape.height)))
+}
+
 function canvas_arrow(
     ctx : CanvasRenderingContext2D,
     fromx : number, 
@@ -348,6 +398,42 @@ function checkEllipse(x : number , y : number , cx : number , cy : number , rx :
     const tolerance = 0.08 + 2 / Math.max(rx , ry)
 
     const value = nx * nx + ny * ny;
-    if(!(Math.abs(value - 1) >= tolerance)) 
-    return Math.abs(value - 1) >= tolerance
+    if((Math.abs(value - 1) > tolerance)) {
+        return Math.abs(value - 1) >= tolerance
+    } else {
+        return Math.abs(value - 1) > tolerance
+    }
+}
+
+
+function checkRect(
+    e: MouseEvent,
+    shape: Shape,
+    tolerance: number = 5
+): boolean {
+    const x = e.clientX
+    const y = e.clientY
+
+    // normalize rectangle (handles right→left, bottom→top)
+    const left   = Math.min(shape.x, shape.x + shape.width)
+    const right  = Math.max(shape.x, shape.x + shape.width)
+    const top    = Math.min(shape.y, shape.y + shape.height)
+    const bottom = Math.max(shape.y, shape.y + shape.height)
+
+    // cursor near outer border
+    const inOuter =
+        x >= left - tolerance &&
+        x <= right + tolerance &&
+        y >= top - tolerance &&
+        y <= bottom + tolerance
+
+    // cursor clearly inside (not on stroke)
+    const inInner =
+        x > left + tolerance &&
+        x < right - tolerance &&
+        y > top + tolerance &&
+        y < bottom - tolerance
+
+    // stroke hit ONLY
+    return inOuter && !inInner
 }
