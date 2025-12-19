@@ -26,8 +26,13 @@ export default async function Draw(
     
     const previousElements = await getExistingElements(roomId , token)
     previousElements.map((element : any) => {
-        existingShape.push(JSON.parse(element.message))
+        if(typeof element.message == "string") {
+            existingShape.push(JSON.parse(element.message))
+        } else {
+            existingShape.push(element.message)
+        }
     })
+    console.log(existingShape)
     renderExistingElements(existingShape , canvas , ctx)
 
 
@@ -104,13 +109,13 @@ export default async function Draw(
         dragging = false
         
         if(currShape.current == "cursor") {
-            // sending 
+            // sending shapes to db
 
-            // socket?.send(JSON.stringify({
-            //     type : "update",
-            //     shapeId : draggingShape.shapeId,
-            //     draggingShape : JSON.stringify(draggingShape)
-            // }))
+            socket?.send(JSON.stringify({
+                type : "update",
+                shapeId : draggingShape.shapeId,
+                draggingShape : draggingShape
+            }))
             return;
         }
 
@@ -288,7 +293,7 @@ export function renderExistingElements(
     
     
     ctx.clearRect(0 , 0 , canvas.width , canvas.height)
-    
+
     ctx.fillStyle = "rgba(236, 253, 245, 1)"
     ctx.fillRect(0 , 0 , canvas.width , canvas.height)
     existingShape.map((shape : Shape) => {
