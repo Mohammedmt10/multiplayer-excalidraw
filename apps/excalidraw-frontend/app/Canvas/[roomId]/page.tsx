@@ -6,6 +6,7 @@ import { ws_url } from "@/app/config"
 import ArrowIcon from "@/icons/arrowIcon"
 import EraserIcon from "@/icons/eraserIcon"
 import { existingShape } from "./canvas"
+import CursorIcon from "@/icons/cursorIcon"
 
 interface IinputBox {
     type : string,
@@ -139,7 +140,7 @@ export default function Canvas() {
         }}></canvas>
             <div className="fixed top-5 translate-x-20 right-[50%] bg-white flex rounded p-1">
                 <button className={` text-black p-2 rounded ${currShape == "cursor" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("cursor")}>
-                    <div className="border-2 w-5 h-5 rounded"></div>
+                    <CursorIcon />
                 </button>
                 <button className={` text-black p-2 rounded ${currShape == "rect" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("rect")}>
                     <div className="border-2 w-5 h-5 rounded "></div>
