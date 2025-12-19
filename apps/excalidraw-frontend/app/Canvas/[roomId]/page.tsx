@@ -27,9 +27,9 @@ export default function Canvas() {
     
     const [socket , setSocket] = useState<WebSocket | null>(null);
     
-    const shapeRef = useRef("rect")
+    const shapeRef = useRef("cursor")
     const inputRef = useRef<HTMLInputElement>(null)
-    const [currShape , setCurrShape] = useState("rect")
+    const [currShape , setCurrShape] = useState("cursor")
     
     const [inputBox , setInputBox] = useState<IinputBox>({
         type : currShape,
@@ -101,7 +101,6 @@ export default function Canvas() {
         autoComplete="off"
         onKeyDown={(e) => {
             if(e.key == "Enter") {
-                setCurrShape("rect")
                 setInputBox((prev) => ({...prev , type : "rect"}))
                 if(!inputRef.current) return
                 if(!ctxRef.current) return

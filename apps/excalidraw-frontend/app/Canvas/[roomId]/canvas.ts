@@ -232,22 +232,17 @@ export default async function Draw(
                         return colision
                     }
                     if(shape.type == "rect") {
-                        const id = shape.shapeId
-                        let tLine = checkLine(e , shape.x , shape.y , shape.x + shape.width , shape.y)
-                        let bLine = checkLine(e , shape.x , shape.y + shape.height , shape.x + shape.width , shape.y + shape.height)
-                        let lLine = checkLine(e , shape.x , shape.y , shape.x , shape.y + shape.height)
-                        let rLine = checkLine(e , shape.x + shape.width , shape.y , shape.x + shape.width , shape.y + shape.height)
-                        
-                        const colision = (tLine && bLine && lLine && rLine)
+                        const id = shape.shapeId        
+                        const colision = checkRect(e , shape)
                         if(deletedShape.includes(id)) return;
-                        if(!colision) {
+                        if(colision) {
                             socket?.send(JSON.stringify({
                                 type : "delete",
                                 shapeId : JSON.stringify(id)
                             }))
                             deletedShape.push(id)
                         }
-                        return colision
+                        return !colision
                     }
                     if(shape.type == "circle") {
                         const id = shape.shapeId
@@ -265,16 +260,16 @@ export default async function Draw(
                     }
                     if(shape.type == "text") {
                         const id = shape.shapeId
-                        const colision = !checkText(e , shape)
+                        const colision = checkText(e , shape)
                         if(deletedShape.includes(id)) return;
-                        if(!colision) {
+                        if(colision) {
                             socket?.send(JSON.stringify({
                                 type : "delete",
                                 shapeId : JSON.stringify(id),
                             }))
                             deletedShape.push(id)
                         }
-                        return colision
+                        return !colision
                     }
                 })
                 renderExistingElements(existingShape , canvas , ctx)

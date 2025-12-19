@@ -79,16 +79,20 @@ wss.on("connection" , function connection(ws , request) {
                         ws.close()
                         return null;
                     }
-                    await prisma.room.update({
-                        where : {
-                            id : parsedData.roomId
-                        },
-                        data : {
-                            users : {
-                                disconnect : { id : userId }
+                    try {
+                        await prisma.room.update({
+                            where : {
+                                id : parsedData.roomId
+                            },
+                            data : {
+                                users : {
+                                    disconnect : { id : userId }
+                                }
                             }
-                        }
-                    })
+                        })
+                    } catch(e) {
+                        
+                    }
                     user.rooms = user?.rooms.filter(x => x === parsedData.room)
                 }
                 
@@ -96,45 +100,63 @@ wss.on("connection" , function connection(ws , request) {
                     const roomId = Number(parsedData.roomId);
                     const message = parsedData.messages
                     
-                    const chat = await prisma.chat.create({
-                        data : {
-                            roomId : roomId,
-                            message : message,
-                            userId : userId,
-                            shapeId : JSON.parse(message).shapeId
-                        }
-                    })
-
-                    if(chat.Id) {
-                        users.forEach(user => {
-                            if(user.rooms) {
-                                user.ws.send(JSON.stringify({
-                                    type : "chat",
-                                    message : message,
-                                    roomId
-                                }))
+                    try {
+                        const chat = await prisma.chat.create({
+                            data : {
+                                roomId : roomId,
+                                message : message,
+                                userId : userId,
+                                shapeId : JSON.parse(message).shapeId
                             }
                         })
+
+                        if(chat.Id) {
+                            users.forEach(user => {
+                                if(user.rooms) {
+                                    user.ws.send(JSON.stringify({
+                                        type : "chat",
+                                        message : message,
+                                        roomId
+                                    }))
+                                }
+                            })
+                        }
+                    } catch (e) {
+
                     }
                 }
                 if(parsedData.type == "delete") {
-                    await prisma.chat.delete({
-                        where : {
-                            shapeId : JSON.parse(parsedData.shapeId)
-                        }
-                    })
+                    if(!parsedData.shapeId) {
+                        return;
+                    }
+                    try {
+                        await prisma.chat.delete({
+                            where : {
+                                shapeId : JSON.parse(parsedData.shapeId)
+                            }
+                        })
+                    } catch (e) {
+                        
+                    }
                 }
                 if(parsedData.type == "update") {
                     const shape = JSON.stringify(parsedData.draggingShape)
-                    console.log(shape)
-                    await prisma.chat.update({
-                        where : {
-                            shapeId : parsedData.shapeId
-                        },
-                        data : {
-                            message : shape
+                    
+                    try {
+                        if(!(parsedData.shapeId && shape)) {
+                            return;
                         }
-                    })
+                        await prisma.chat.update({
+                            where : {
+                                shapeId : parsedData.shapeId
+                            },
+                            data : {
+                                message : shape
+                            }
+                        })
+                    } catch(e) {
+                        
+                    }
                 }
             })
     } catch (e) {
