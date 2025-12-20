@@ -32,7 +32,7 @@ export default async function Draw(
             existingShape.push(element.message)
         }
     })
-    console.log(existingShape)
+    
     renderExistingElements(existingShape , canvas , ctx)
 
 
@@ -55,7 +55,7 @@ export default async function Draw(
     let height = 0;
 
     let dragging = false
-    let draggingShape : Shape;
+    let draggingShape : Shape | null = null;
     
     canvas.addEventListener("mousedown" , (e) => {
         startX = e.clientX
@@ -69,32 +69,37 @@ export default async function Draw(
                     const colision = checkLine(e , shape.x , shape.y , shape.width , shape.height);
                     
                     if(!colision) {
-                        dragging = true
                         draggingShape = shape;
+                        dragging = true
+                        return
                     }
                 }
 
                 if(shape.type == "circle") {
                     const colision = checkEllipse(e.clientX , e.clientY , shape.x  , shape.y , shape.width / 2 , shape.height / 2)
-                    if(!colision) {
-                        dragging = true;
+                    if(colision) {
                         draggingShape = shape
+                        dragging = true;
+                        return
                     }
                 }
 
                 if(shape.type == "text") {
                     const colision = checkText(e , shape)
+                    console.log(colision)
                     if(colision) {
-                        dragging = true;
                         draggingShape = shape
+                        dragging = true;
+                        return
                     }
                 }
 
                 if(shape.type == "rect") {
                     const colision = checkRect(e , shape)
                     if(colision) {
-                        dragging = true;
                         draggingShape = shape
+                        dragging = true;
+                        return
                     }
                 }
 
@@ -110,12 +115,17 @@ export default async function Draw(
         
         if(currShape.current == "cursor") {
             // sending shapes to db
+            
+            try {
+                if(!draggingShape) return
+                socket?.send(JSON.stringify({
+                    type : "update",
+                    shapeId : draggingShape.shapeId,
+                    draggingShape : draggingShape
+                }))
+            } catch (e) {
 
-            socket?.send(JSON.stringify({
-                type : "update",
-                shapeId : draggingShape.shapeId,
-                draggingShape : draggingShape
-            }))
+            }
             return;
         }
 
@@ -197,10 +207,12 @@ export default async function Draw(
             if(currShape.current == "cursor" && dragging) {
                 
                     let dx =  e.clientX - startX ;
-                    let dy =  e.clientY -startY;
+                    let dy =  e.clientY - startY;
                     
-                    const idx = existingShape.findIndex(x => x.shapeId == draggingShape.shapeId)
+                    if(draggingShape == null) return
+                    if(!draggingShape.shapeId) return;
 
+                    
                     draggingShape.x += dx;
                     draggingShape.y += dy
                     
@@ -208,6 +220,8 @@ export default async function Draw(
                         draggingShape.width += dx;
                         draggingShape.height += dy
                     }
+
+                    const idx = existingShape.findIndex(x => x.shapeId == draggingShape?.shapeId)
                     
                     if(idx >= 0) {
                         existingShape[idx] = {...draggingShape}
