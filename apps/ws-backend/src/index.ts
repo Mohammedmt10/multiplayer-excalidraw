@@ -112,6 +112,7 @@ wss.on("connection" , function connection(ws , request) {
 
                         if(chat.Id) {
                             users.forEach(user => {
+                                if(user.userId == userId) return
                                 if(user.rooms) {
                                     user.ws.send(JSON.stringify({
                                         type : "chat",
@@ -135,6 +136,15 @@ wss.on("connection" , function connection(ws , request) {
                                 shapeId : JSON.parse(parsedData.shapeId)
                             }
                         })
+                        users.forEach(user => {
+                            if(user.userId == userId) return
+                            if(user.rooms) {
+                                user.ws.send(JSON.stringify({
+                                    type : "delete",
+                                    shapeId : parsedData.shapeId
+                                }))
+                            }
+                        })
                     } catch (e) {
                         
                     }
@@ -152,6 +162,16 @@ wss.on("connection" , function connection(ws , request) {
                             },
                             data : {
                                 message : shape
+                            }
+                        })
+                        users.forEach(user => {
+                            if(user.userId == userId) return
+                            if(user.rooms) {
+                                user.ws.send(JSON.stringify({
+                                    type : "update",
+                                    shapeId : parsedData.shapeId,
+                                    message : shape
+                                }))
                             }
                         })
                     } catch(e) {

@@ -68,7 +68,6 @@ export default function Canvas() {
             return;
         }
         const canvas = canvasRef.current
-        const ctx = ctxRef.current
         if(canvas) {
             if(!canvas) return;
             ctxRef.current = canvas.getContext("2d");
@@ -137,27 +136,27 @@ export default function Canvas() {
         <canvas ref={canvasRef} height={window.innerHeight} width={window.innerWidth} onClick={(e : any) => {
             addInput(e.clientX , e.clientY);
         }}></canvas>
-            <div className="fixed top-5 translate-x-20 right-[50%] bg-white flex rounded p-1">
-                <button className={` text-black p-2 rounded ${currShape == "cursor" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("cursor")}>
+            <div className="fixed top-5 translate-x-1/2 right-[50%] bg-white flex rounded p-1">
+                <button className={` text-black p-2 rounded mx-0.5 ${currShape == "cursor" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("cursor")}>
                     <CursorIcon />
                 </button>
-                <button className={` text-black p-2 rounded ${currShape == "rect" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("rect")}>
-                    <div className="border-2 w-5 h-5 rounded "></div>
+                <button className={` text-black p-2 rounded mx-0.5 ${currShape == "rect" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("rect")}>
+                    <div className="border-2 w-5 h-5 rounded mx-1"></div>
                 </button>
-                <button className={` text-black p-2 rounded ${currShape == "circle" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("circle")}>
-                    <div className="border-2 w-5 h-5 rounded-full "></div>
+                <button className={` text-black p-2 rounded mx-0.5 ${currShape == "circle" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("circle")}>
+                    <div className="border-2 w-5 h-5 rounded-full mx-1"></div>
                 </button>
                 <button className={` text-black p-2 rounded ${currShape == "line" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("line")}>
-                    <div className="h-0 w-5 border-t-2"></div>
+                    <div className="h-0 w-5 border-t-2 mx-1"></div>
                 </button>
-                <button className={` text-black p-2 rounded ${currShape == "arrow" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("arrow")}>
-                    <div className="-rotate-90"><ArrowIcon /></div>
+                <button className={` text-black p-2 rounded mx-0.5 ${currShape == "arrow" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("arrow")}>
+                    <div className="-rotate-90 mx-1"><ArrowIcon /></div>
                 </button>
-                <button className={` text-black p-2 rounded ${currShape == "text" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("text")}>
-                    <div className="w-5 h-5 text-xl flex items-center px-0.5">A</div>
+                <button className={` text-black p-2 rounded mx-0.5 ${currShape == "text" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("text")}>
+                    <div className="w-5 h-5 text-xl flex items-center px-0.5 ml-1">A</div>
                 </button>
-                <button className={` text-black p-2 rounded ${currShape == "eraser" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("eraser")}>
-                    <div className=""><EraserIcon /></div>
+                <button className={` text-black p-2 rounded mx-0.5 ${currShape == "eraser" ? "bg-[#4ed6ab] text-white" :"hover:bg-neutral-100"} cursor-pointer`} onClick={() => handleChange("eraser")}>
+                    <div className="mx-1"><EraserIcon /></div>
                 </button>
             </div>
     </div>

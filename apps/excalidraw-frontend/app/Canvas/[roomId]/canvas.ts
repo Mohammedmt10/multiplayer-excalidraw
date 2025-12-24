@@ -23,14 +23,13 @@ export default async function Draw(
     currShape : { current : string },
     token : string
 ) {
+
+    existingShape.length = 0
     
     const previousElements = await getExistingElements(roomId , token)
+    
     previousElements.map((element : any) => {
-        if(typeof element.message == "string") {
-            existingShape.push(JSON.parse(element.message))
-        } else {
-            existingShape.push(element.message)
-        }
+        existingShape.push(JSON.parse(element.message))
     })
     
     renderExistingElements(existingShape , canvas , ctx)
@@ -41,7 +40,15 @@ export default async function Draw(
         socket.onmessage = (event) => {
             const shapes = JSON.parse(event.data);
             if(shapes.type == "chat") {
-                if (typeof shapes.message !== "string") return;
+                existingShape.push(JSON.parse(shapes.message))
+                renderExistingElements(existingShape , canvas , ctx)
+            } else if(shapes.type == "update") {
+                const idx = existingShape.findIndex(obj => obj.shapeId == shapes.shapeId)
+                existingShape[idx] = JSON.parse(shapes.message)
+                renderExistingElements(existingShape , canvas , ctx)
+            } else if(shapes.type == "delete") {
+                const idx = existingShape.findIndex(obj => obj.shapeId == shapes.shapeId)
+                existingShape.splice(idx , 1)
                 renderExistingElements(existingShape , canvas , ctx)
             }
         }
@@ -76,8 +83,9 @@ export default async function Draw(
                 }
 
                 if(shape.type == "circle") {
-                    const colision = checkEllipse(e.clientX , e.clientY , shape.x  , shape.y , shape.width / 2 , shape.height / 2)
-                    if(colision) {
+                    const colision = checkEllipse(e.clientX , e.clientY , shape.x + shape.width / 2  , shape.y + shape.height /2 , shape.width / 2 , shape.height / 2)
+                    console.log(colision)
+                    if(!colision) {
                         draggingShape = shape
                         dragging = true;
                         return
@@ -86,7 +94,6 @@ export default async function Draw(
 
                 if(shape.type == "text") {
                     const colision = checkText(e , shape)
-                    console.log(colision)
                     if(colision) {
                         draggingShape = shape
                         dragging = true;
@@ -111,7 +118,7 @@ export default async function Draw(
     
     canvas.addEventListener("mouseup" , (e) => {
         clicked = false;
-        dragging = false
+        dragging = false;
         
         if(currShape.current == "cursor") {
             // sending shapes to db
@@ -123,6 +130,7 @@ export default async function Draw(
                     shapeId : draggingShape.shapeId,
                     draggingShape : draggingShape
                 }))
+                draggingShape = null;
             } catch (e) {
 
             }
@@ -157,9 +165,8 @@ export default async function Draw(
                 width : width,
                 height : height
             })
-        }
-        
         renderExistingElements(existingShape , canvas , ctx)
+        }
         if(currShape.current == "eraser" || currShape.current == "text" || currShape.current == "cursor") return;
         socket?.send(JSON.stringify({
             type : "chat",
@@ -173,6 +180,8 @@ export default async function Draw(
                 height : height
             })
         }));
+        
+        renderExistingElements(existingShape , canvas , ctx)
     })
     canvas.addEventListener("mousemove" , (e) => {
         if(clicked) {
@@ -308,6 +317,7 @@ export function renderExistingElements(
     existingShape.map((shape : Shape) => {
         
         if(shape.type == "rect") {
+            console.log(shape)
              ctx.strokeStyle = "rgba(10, 104, 71, 1)"
              ctx.strokeRect(shape.x , shape.y , shape.width , shape.height)
         } else if (shape.type == "circle") {

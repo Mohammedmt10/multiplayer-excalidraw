@@ -39,7 +39,7 @@ export default function AuthPage() {
                 name : name
             })
             if(res.data) {
-                window.location.href = "http://localhost:3000/"
+                window.location.href = "http://localhost:3000/SignIn"
             }
         }
     }
