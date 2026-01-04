@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Overpass:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Titillium+Web&display=swap');
+@import "tailwindcss";
+
+
+@theme {
+  --font-titillium: 'Titillium Web', sans-serif;
+  --font-heading : "Rajdhani", sans-serif;
+  --font-overpass: "Overpass", sans-serif;      
+  --color-textColor : #001E4C;
+  --color-gradientGreen : #4ADE80;
+  --color-gradientBlue : #38BDF8;
+  --color-cardBg : #E3FFE5;
+  --color-iconBg : #89FF91;
+  --color-footerBg : #00122F
+}
+
+@source "../../../packages/ui/src/*";

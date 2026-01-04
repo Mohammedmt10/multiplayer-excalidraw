@@ -1,5 +1,5 @@
 export default function Logo() {
-    return <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    return <svg className="h-20 w-20" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
   <rect x="22" y="56" width="66" height="8" rx="1.5" fill="#0f172a"
         transform="rotate(-45 60 60)"/>
   <rect x="16" y="56" width="6" height="8" fill="#334155"

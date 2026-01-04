@@ -1,5 +1,5 @@
 {
-  "name": "excalidraw-frontend",
+  "name": "excalidraw-app",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,12 +10,11 @@
   },
   "dependencies": {
     "@repo/ui": "workspace:*",
-    "@types/recoil": "^0.0.9",
     "axios": "^1.13.2",
-    "next": "16.0.8",
-    "react": "19.2.1",
-    "react-dom": "19.2.1",
-    "recoil": "^0.7.7"
+    "next": "16.1.1",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-snowfall": "^2.4.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -23,7 +22,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.0.8",
+    "eslint-config-next": "16.1.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

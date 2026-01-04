@@ -117,10 +117,13 @@ app.post("/room" , middleware , async (req , res) => {
     const safeData = safeParsed.data
 
     try {
+        const hashedPassword = await bcrypt.hash(safeData.roomPassword , 5);
+        
         const newRoom = await prisma.room.create({
             data : {
                 slug : safeData.roomName,
                 adminId : userId,
+                password : hashedPassword,
                 users : {
                     connect : { id : userId}
                 }
@@ -135,6 +138,61 @@ app.post("/room" , middleware , async (req , res) => {
             message : "something went wrong",
             error : e
         })
+    }
+})
+
+app.post("/joinRoom" , middleware , async (req  ,res) => {
+    const safeParsed = createRoomSchema.safeParse(req.body);
+    const userId = req.userId
+
+    if(!safeParsed.success) {
+        return res.status(422).json({
+            message : "invalid input"
+        })
+    }
+
+    const data = safeParsed.data;
+
+    try {
+        
+        const room = await prisma.room.findFirst({
+            where : {
+                slug : data.roomName
+            }
+        });
+
+        if(!room?.password) return res.json({
+            message : "invalid password"
+        })
+        
+        const comparePassword = await bcrypt.compare(data.roomPassword, room.password);
+    
+        if(!comparePassword) {
+            return res.json({
+                message : 'invalid input'
+            })
+        }
+        await prisma.room.update({
+            where : {
+                id : Number(room.id)
+            },
+            data : {
+                users : {
+                    connect : {
+                        id : userId
+                    }
+                }
+            }
+        });
+
+        return res.json({
+            message : 'joined the room',
+            roomId : room.id
+        })
+    } catch(e) {
+        return res.status(500).json({
+            message : 'something went wrong'
+        });
     }
 })
 

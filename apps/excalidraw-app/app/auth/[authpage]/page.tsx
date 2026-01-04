@@ -7,8 +7,8 @@ import { FormEvent, useRef, useState } from "react";
 
 export default function AuthPage() {
 
-    const params = useParams().AuthPage;
-    const [isSignIn, setIsSignIn] = useState(params == "SignIn" ? true : false);
+    const params = useParams().authpage;
+    const [isSignIn, setIsSignIn] = useState(params == "signin" ? true : false);
 
     
     const buttonHandler = async (e : FormEvent<HTMLFormElement>) => {
@@ -44,9 +44,9 @@ export default function AuthPage() {
         }
     }
 
-    return <div className="h-screen w-screen flex items-center">
+    return <div className="h-screen w-screen flex items-center text-textColor font-titillium">
         <div className="w-full h-screen flex justify-center flex-col items-center gap-10">
-            <div className="text-4xl font-semibold">
+            <div className="text-4xl font-semibold font-heading">
                 {isSignIn ? "Sign In" : "Sign Up"}
             </div>
             <form onSubmit={buttonHandler} className="text-lg">
@@ -68,12 +68,12 @@ export default function AuthPage() {
                 </div>
             </form>
         </div>
-        <div className="w-full h-full bg-[#008e61] flex justify-center items-center text-center text-white">
+        <div className="w-full h-full bg-gradientGreen flex justify-center items-center text-center">
                 <div>
-                    <div className="text-3xl font-semibold mb-4">
+                    <div className="text-4xl font-semibold mb-4 font-heading">
                         {isSignIn ? "Welcome Back to Excalidraw Multiplayer" : "Welcome to Excalidraw Multiplayer"}
                     </div>
-                    <div className="text-lg">
+                    <div className="text-lg font-titillium font-medium">
                             Collaborate with your friends in real time <br /> 
                             and bring your ideas to life on shared Excalidraw boards.
                     </div>
