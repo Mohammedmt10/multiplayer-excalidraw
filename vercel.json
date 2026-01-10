@@ -4,5 +4,4 @@
   "buildCommand": "pnpm --filter excalidraw-app build",
   "outputDirectory": "apps/excalidraw-app/.next",
   "framework": "nextjs",
-  "packageManager": "pnpm@9.15.0"
 }
