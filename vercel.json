@@ -1,7 +1,0 @@
-{
-  "version": 2,
-  "installCommand": "",
-  "buildCommand": "pnpm --filter excalidraw-app build",
-  "outputDirectory": "apps/excalidraw-app/.next",
-  "framework": "nextjs"
-}
